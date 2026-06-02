@@ -1,0 +1,54 @@
+/**
+ * Project: Height-Adjustable Washbasin for Wheelchair Users
+ * Description: Control logic for an automated water valve using 
+ *              PIR motion detection and manual override.
+ */
+
+// Konstanten für Pin-Belegungen (Bessere Lesbarkeit & Wartung)
+const int VALVE_PIN  = 12; 
+const int PIR_PIN    = 8;  
+const int SWITCH_PIN = 4;  
+
+// Status-Variablen
+bool isValveActive = false;
+
+void setup() {
+  pinMode(VALVE_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(SWITCH_PIN, INPUT);
+  
+  Serial.begin(9600);
+  Serial.println("System Initialized: Washbasin Control Active.");
+}
+
+void loop() {
+  // Sensoren auslesen mit aussagekräftigen Namen
+  bool motionDetected = digitalRead(PIR_PIN);
+  bool manualTrigger  = digitalRead(SWITCH_PIN);
+
+  // Logik: Ventil öffnet, wenn Bewegung ODER Taster aktiv (Verbesserung der Usability)
+  // Wenn Sie die ursprüngliche Logik (beides muss aktiv sein) behalten wollen, 
+  // ändern Sie || wieder zu &&.
+  if (motionDetected || manualTrigger) {
+    if (!isValveActive) {
+      activateValve();
+    }
+  } else {
+    if (isValveActive) {
+      deactivateValve();
+    }
+  }
+}
+
+// Funktionen zur Kapselung der Hardware-Ansteuerung
+void activateValve() {
+  digitalWrite(VALVE_PIN, HIGH);
+  isValveActive = true;
+  Serial.println("Action: Valve OPEN - User detected or manual override.");
+}
+
+void deactivateValve() {
+  digitalWrite(VALVE_PIN, LOW);
+  isValveActive = false;
+  Serial.println("Action: Valve CLOSED - No presence detected.");
+}
